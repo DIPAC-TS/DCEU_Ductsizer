@@ -21,7 +21,7 @@ public class Fitting {
 		ER3_1,
 		ER4_1,
 		ER4_3,
-		ER5_1,
+		ER5_2,
 		ER5_3,
 		SR3_1,
 		SR4_1,
@@ -50,7 +50,7 @@ public class Fitting {
 			break;
 		case CD3_3:
 			a_type = Type.Elbow;
-			a_ASHRAE = ASHRAE_DB.CD3_1;
+			a_ASHRAE = ASHRAE_DB.CD3_3;
 			a_nmparam = new String[1];
 			a_nmparam[0] = "D";
 			break;
@@ -104,7 +104,12 @@ public class Fitting {
 			a_nmparam[0] = "th";
 			a_nmparam[1] = "A_0/A_1";
 			break;
-		case ER5_1:
+		case ER5_2:
+			a_type = Type.Tee;
+			a_ASHRAE = ASHRAE_DB.ER5_2;
+			a_nmparam = new String[2];
+			a_nmparam[0] = "Q_b/Q_c";
+			a_nmparam[1] = "Q_s/Q_c";
 			break;
 		case ER5_3:
 			a_type = Type.Tee;
@@ -261,7 +266,13 @@ public class Fitting {
 					{0.0, 3.89, 3.04, 1.84, 1.77, 1.78, 1.73, 2.18, 2.67, 6.67, 10.07, 13.09, 15.18},
 					{0.0, 11.8, 9.31, 5.4, 5.18, 5.15, 5.05, 6.44, 7.94, 19.06, 28.55, 36.75, 42.75}};
 			a_loss[0] = DataTool.interpolate2D(th3, a_param[0], A0A1_1, a_param[1], data7);
-		case ER5_1:
+			break;
+		case ER5_2:
+			double[] Q_Qc2 = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
+			double[] data12_a = {-14., -2.38, -.5, 0.65, 1.03, 1.17, 1.19, 1.33, 1.51, 1.44};
+			double[] data12_b = {22.15, 11.91, 6.54, 3.74, 2.23, 1.33, 0.76, 0.38, 0.1, 0.};
+			a_loss[0] = DataTool.interpolate(Q_Qc2, a_param[0], data12_a);
+			a_loss[1] = DataTool.interpolate(Q_Qc2, a_param[1], data12_b);
 			break;
 		case ER5_3:
 			double[] Q_Qc = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
@@ -334,20 +345,22 @@ public class Fitting {
 		while(sel < 1 || sel > 13) {
 			try {
 			System.out.println("1.  CD3-1");
-			System.out.println("2.  CR3-1");
-			System.out.println("3.  SD4-1");
-			System.out.println("4.  SD4-2");
-			System.out.println("5.  CR3-6");
-			System.out.println("6.  ER3-1");
-			System.out.println("7.  ER4-1");
-			System.out.println("8.  ER4-3");
-			System.out.println("9.  ER5-3");
-			System.out.println("10.  SR3-1");
-			System.out.println("11.  SR4-1");
-			System.out.println("12. SR4-3");
-			System.out.println("13. SR5-11");
-			System.out.println("14. SR5-13");
-			System.out.println("15. SR5-15");
+			System.out.println("2.  CD3-3");
+			System.out.println("3.  9R3-1");
+			System.out.println("4.  SD4-1");
+			System.out.println("5.  SD4-2");
+			System.out.println("6.  CR3-6");
+			System.out.println("7.  ER3-1");
+			System.out.println("8.  ER4-1");
+			System.out.println("9.  ER4-3");
+			System.out.println("10. ER5-2");
+			System.out.println("11. ER5-3");
+			System.out.println("12. SR3-1");
+			System.out.println("13. SR4-1");
+			System.out.println("14. SR4-3");
+			System.out.println("15. SR5-11");
+			System.out.println("16. SR5-13");
+			System.out.println("17. SR5-15");
 			System.out.print("Select an option:");
 			sel = Integer.parseInt(in.readLine());
 			} catch (IOException ex) {
@@ -364,8 +377,17 @@ public class Fitting {
 					Fitting CD31 = new Fitting(Fitting.ASHRAE_DB.CD3_1, param);
 					System.out.println(CD31.report(0));
 					break;
-				}	
-				case 2:{//CR3-1
+				}
+				case 2:{//CD3-3
+					double D;
+					System.out.print("D: ");
+					D = Double.parseDouble(in.readLine());
+					param[0] = D;
+					Fitting CD33 = new Fitting(Fitting.ASHRAE_DB.CD3_3, param);
+					System.out.println(CD33.report(0));
+					break;
+				}
+				case 3:{//CR3-1
 					double H, W, rW, th;
 					System.out.print("W: ");
 					W = Double.parseDouble(in.readLine());
@@ -382,7 +404,7 @@ public class Fitting {
 					System.out.println(CR31.report(0));
 					break;
 				}
-				case 3:{//SD4-1
+				case 4:{//SD4-1
 					double D0, D1, th;
 					System.out.println("D0: ");
 					D0 = Double.parseDouble(in.readLine());
@@ -396,7 +418,7 @@ public class Fitting {
 					System.out.println(SD41.report(0));
 					break;
 				}
-				case 4:{//SD4-2
+				case 5:{//SD4-2
 					double D0, H1, W1, th;	
 					System.out.println("D0: ");
 					D0 = Double.parseDouble(in.readLine());
@@ -412,7 +434,7 @@ public class Fitting {
 					System.out.println(SD42.report(0));
 					break;
 				}
-				case 5:{//CR3-6
+				case 6:{//CR3-6
 					double H, W, th;
 					System.out.print("W: ");
 					W = Double.parseDouble(in.readLine());
@@ -426,7 +448,7 @@ public class Fitting {
 					System.out.println(CR36.report(0));
 					break;
 				}
-				case 6:{//ER3-1
+				case 7:{//ER3-1
 					double H, W0, W1;
 					System.out.print("W0: ");
 					W0 = Double.parseDouble(in.readLine());
@@ -440,7 +462,7 @@ public class Fitting {
 					System.out.println(ER31.report(0));
 					break;
 				}
-				case 7:{//ER4-1
+				case 8:{//ER4-1
 					double th, H0, H1;
 					System.out.print("Hin: ");
 					H0 = Double.parseDouble(in.readLine());
@@ -454,7 +476,7 @@ public class Fitting {
 					System.out.println(ER41.report(0));
 					break;
 				}
-				case 8:{//ER4-3
+				case 9:{//ER4-3
 					double th, W, H, D;
 					System.out.print("W: ");
 					W = Double.parseDouble(in.readLine());
@@ -470,7 +492,20 @@ public class Fitting {
 					System.out.println(ER43.report(0));
 					break;
 				}
-				case 9:{//ER5-30 
+				case 10:{//ER5-2
+					double Qb, Qc;
+					System.out.print("Qc: ");
+					Qc = Double.parseDouble(in.readLine());
+					System.out.print("Qb: ");
+					Qb = Double.parseDouble(in.readLine());
+					param[0] = Qb / Qc;
+					param[1] = 1. - param[0];
+					Fitting ER52 = new Fitting(Fitting.ASHRAE_DB.ER5_2, param);
+					System.out.println(ER52.report(0));
+					System.out.println(ER52.report(1));
+					break;
+				}
+				case 11:{//ER5-3
 					double Qb, Qc;
 					System.out.print("Qc: ");
 					Qc = Double.parseDouble(in.readLine());
@@ -483,7 +518,7 @@ public class Fitting {
 					System.out.println(ER53.report(1));
 					break;
 				}
-				case 10:{//SR3-1
+				case 12:{//SR3-1
 					double W0, W1, H;
 					System.out.print("W0: ");
 					W0 = Double.parseDouble(in.readLine());
@@ -497,7 +532,7 @@ public class Fitting {
 					System.out.println(SR31.report(0));
 					break;
 				}
-				case 11:{//SR4-1
+				case 13:{//SR4-1
 					double th, H0, H1;
 					System.out.print("th: ");
 					th = Double.parseDouble(in.readLine());
@@ -511,16 +546,16 @@ public class Fitting {
 					System.out.println(SR41.report(0));
 					break;
 				}
-				case 12:{//SR4-3
+				case 14:{//SR4-3
 					break;
 				}
-				case 13:{//SR5-11
+				case 15:{//SR5-11
 					break;
 				}
-				case 14:{//SR5-13
+				case 16:{//SR5-13
 					break;
 				}
-				case 15:{//SR5-15
+				case 17:{//SR5-15
 					break;
 				}
 				default:{
