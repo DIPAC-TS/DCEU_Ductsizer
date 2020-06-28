@@ -4,6 +4,7 @@ import java.util.ArrayList;
 public class Duct {
 	String a_name;
 	ArrayList<Fitting> a_fittings;
+	boolean a_fixedWidth;
 	double a_flow;
 	double[] a_size;
 	double a_length;
@@ -13,45 +14,31 @@ public class Duct {
 	enum REF{
 		FLOW,
 		SIZE,
+		LOSS,
 		VELOCITY
 	}
+	
+	enum UNiTS{
+		IP,
+		SI
+	}
+	
 	enum TYPE{
 		RECTANGULAR,
 		ROUND,
 		OVAL
 	}
 	
-	public Duct(double size, double len) {
-		a_name = "default";
-		a_flow = 1000.;
-		a_type = TYPE.ROUND;
-		a_size = new double[1];
-		a_size[0] = size;
-		a_length = len;
-		a_fittings = new ArrayList<Fitting>();
+	public Duct() {
+		this(300., 1.);
+	}
+	
+	public Duct(double diam, double len) {
+		this(convertToSize(diam), len, TYPE.ROUND);
 	}
 	
 	public Duct(double[] size, double len, TYPE type) {
-		a_name = "default";
-		a_flow = 1000.;
-		a_type = type;
-		a_length = len;
-		if (type == TYPE.ROUND) {
-			a_size = new double[1];
-			a_size[0] = size[0];
-		} else {
-				a_size = new double[2];
-				a_size[0]  = Math.max(size[0], size[1]);
-				a_size[1]  = Math.max(size[0], size[1]);
-		}
-		if (type == TYPE.OVAL) {
-			if (size[0] == size[1]) {
-				a_size = new double[1];
-				a_size[0] = size[0];
-				a_type = TYPE.ROUND;
-			}
-		}
-		a_fittings = new ArrayList<Fitting>();
+		this(size, len, type, 0.09);
 	}
 	
 	public Duct(double[] size, double len, TYPE type, double E) {
@@ -59,19 +46,32 @@ public class Duct {
 		a_flow = 1000.;
 		a_type = type;
 		a_length = len;
-		if (type == TYPE.ROUND) {
-			a_size = new double[1];
-			a_size[0] = size[0];
-		} else {
+		a_fixedWidth = false;
+		switch(type) {
+			case RECTANGULAR:{
+				a_fixedWidth = true;
 				a_size = new double[2];
-				a_size[0]  = Math.max(size[0], size[1]);
-				a_size[1]  = Math.max(size[0], size[1]);
-		}
-		if (type == TYPE.OVAL) {
-			if (size[0] == size[1]) {
+				a_size[0] = size[0];
+				a_size[1] = size[1];
+				break;
+			}
+			case ROUND:{
 				a_size = new double[1];
 				a_size[0] = size[0];
-				a_type = TYPE.ROUND;
+				break;
+			}
+			default:{ //OVAL
+				a_size = new double[2];
+				if (size[0] > size[1]) {
+					a_size[0] = size[0];
+					a_size[1] = size[1];
+				} else {
+					a_size[1] = size[0];
+					a_size[0] = size[1];
+					if (size[0] == size[1]) {
+						a_type = TYPE.ROUND;
+					}
+				}
 			}
 		}
 		a_E = 0.09;
@@ -79,14 +79,135 @@ public class Duct {
 		a_fittings = new ArrayList<Fitting>();
 	}
 	
+	public boolean setName(String name) {
+		a_name = name;
+		return true;
+	}
+	
+	public String getName() {
+		return a_name;
+	}
+	
 	public boolean addFitting(Fitting fitt) {
 		a_fittings.add(fitt);
 		return true;
 	}
 	
-	public boolean setName(String name) {
-		a_name = name;
+	public boolean removeFitting(Fitting fitt) {
+		a_fittings.remove(fitt);
 		return true;
+	}
+	
+	public boolean fixWidth(boolean yn) {
+		if (a_type == TYPE.RECTANGULAR) {
+			a_fixedWidth = yn;
+			return true;
+		} else
+			return false;
+	}
+	
+	public boolean IsWidthFixed() {
+		return a_fixedWidth;
+	}
+	
+	public boolean setFlow(double flow, REF ref) {
+		double refval, e, rate;
+		int index;
+		if (flow < 0. || flow == getFlow()) {
+			return false;
+		}
+		switch(ref) {
+			case LOSS:
+				refval = getLossRate();
+				setFlow(flow, REF.SIZE);
+				e = 1.0;
+				rate = 100.;
+				index = (a_fixedWidth) ? 1 : 0;
+				while (e > 0.0001) {
+					if (refval < getLossRate()) {
+						a_size[index] += rate;
+						if(refval > getLossRate()) {
+							a_size[index] -= rate;
+							rate /= 10.;
+						}
+					} else if (refval > getLossRate()) {
+						a_size[index] -= rate;
+						if (refval < getLossRate() || a_size[index] < 0.) {
+							a_size[index] += rate;
+							rate /= 10.;
+						}
+					}
+					e = Math.abs(getLossRate() - refval);
+				}
+				return true;
+			case VELOCITY:
+				refval = getFluidVelocity();
+				setFlow(flow, REF.SIZE);
+				e = 1.0;
+				rate = 100.;
+				index = (a_fixedWidth) ? 1 : 0;
+				while (e > 0.0001) {
+					if (refval < getFluidVelocity()) {
+						a_size[index] += rate;
+						if(refval > getFluidVelocity()) {
+							a_size[index] -= rate;
+							rate /= 10.;
+						}
+					} else if (refval > getFluidVelocity()) {
+						a_size[index] -= rate;
+						if (refval < getFluidVelocity() || a_size[index] < 0.) {
+							a_size[index] += rate;
+							rate /= 10.;
+						}
+					}
+					e = Math.abs(getFluidVelocity() - refval);
+				}
+				return true;
+			case SIZE:
+				a_flow = flow;
+				return true;
+			default: //FLOW
+				return false;
+		}
+	}
+	
+	public double getFlow() {
+		return a_flow;
+	}
+	
+	public boolean setSize(double d) {
+		return setDe(d);
+	}
+	
+	public boolean setSize(double[] size, TYPE type) {
+		switch(type) {
+		case RECTANGULAR:
+			//Pending to define
+			return true;
+		case ROUND:
+			//Pending to define
+			return true;
+		default: //OVAL
+			//Pending to define
+			return true;
+		}
+	}
+	
+	public double[] getSize() {
+		return a_size;
+	}
+	
+	public boolean setLength(double l) {
+		if (l < 0.)
+			return false;
+		else {
+			a_length = l;
+			return true;
+		}
+	}
+	
+	public double getLength() {
+		return a_length;
 	}
 	
 	public boolean setRoughness(double E) {
@@ -96,6 +217,10 @@ public class Duct {
 			a_E = E;
 			return true;
 		}
+	}
+	
+	public double getRoughness() {
+		return a_E;
 	}
 	
 	public double getA() {
@@ -111,6 +236,10 @@ public class Duct {
 						+ a_size[1] * (a_size[0] - a_size[1]);
 			}
 		}
+	}
+	
+	public double getFluidA() {
+		return Math.PI * getDe() * getDe() / 4.;
 	}
 	
 	public double getP() {
@@ -135,45 +264,85 @@ public class Duct {
 		}
 	}
 	
+	public boolean setDe(double d, REF ref) {
+		if (d < 0.)
+			return false;
+		switch(ref) {
+		case FLOW:
+			// Pending to define
+			return true;
+		case LOSS:
+			// Pending to define
+			return true;
+		case VELOCITY:
+			// Pending to define
+			return true;
+		default://SIZE
+			return false;
+		}
+	}
+	
 	public double getDe() {
 		switch (a_type) {
-			case RECTANGULAR:{
+			case RECTANGULAR:
 				return 1.3 * Math.pow(a_size[0] * a_size[1], 0.625) 
-						/ Math.pow(a_size[0] + a_size[1], 0.25); 
-			}
-			case ROUND:{
+						/ Math.pow(a_size[0] + a_size[1], 0.25);
+			case ROUND:
 				return a_size[0];
-			}
-			default:{//OVAL
+			default://OVAL
 				return 1.55 * Math.pow(getA(), 0.625) / Math.pow(getP(), 0.25);
+		}
+	}
+	
+	private boolean setDe(double d) {
+		if (d < 0.)
+			return false;
+		double e = 10.0;
+		int index = (a_fixedWidth) ? 1 : 0;
+		switch(a_type) {
+		case RECTANGULAR:
+			while(e > 0.01) {
+				a_size[index] = d * a_size[index] / getDe();
+				e = Math.abs(d - getDe());
 			}
-		}
-	}
-	
-	public boolean setFlow(double flow, REF ref) {
-		if(ref == REF.VELOCITY) {
-			//Code no availaible right now
 			return true;
-		} else {
-			a_flow = flow;
+		case ROUND:
+			a_size[0] = d * getP() / getA() / 4.;
 			return true;
+		default: //OVAL
+			// To define
+			return true;	
 		}
-	}
-	
-	public double getFlow() {
-		return a_flow;
 	}
 	
 	public double getVelocity(){
 		return a_flow / getA() * 1000.;
 	}
 	
-	public double getRoughness() {
-		return a_E;
+	public boolean setFluidVelocity(double v, REF ref) {
+		if (v < 0.)
+			return false;
+		switch(ref) {
+		case FLOW:
+			// Pending to define
+			return true;
+		case LOSS:
+			// Pending to define
+			return true;
+		case SIZE:
+			// Pending to define
+			return true;
+		default: //VELOCITY
+			return false;
+		}
+	}
+	
+	public double getFluidVelocity() {
+		return a_flow / getFluidA() * 1000.;
 	}
 	
 	public double getVelPressure() {
-		return 0.602 * getVelocity() * getVelocity();
+		return 0.602 * getFluidVelocity() * getFluidVelocity();
 	}
 	
 	public double getffactor() {
@@ -186,8 +355,58 @@ public class Duct {
 		return f;
 	}
 	
+	public boolean setLossRate(double loss, REF ref) {
+		if (loss < 0.0 || loss == getLossRate())
+			return false;
+		double rate = 100.;
+		double e = 100.0;
+		switch(ref) {
+		case FLOW:
+			while (e > 0.00001) {
+					if(loss < getLossRate()) {
+						setDe(getDe() + rate);
+						if(loss > getLossRate()) {
+							setDe(getDe() - rate);
+							rate /= 10.;
+						}
+					} else {
+						setDe(getDe() - rate);
+						if(loss < getLossRate() || getDe() - rate < 0.) {
+							setDe(getDe() + rate);
+							rate /= 10.;
+						}
+					}
+					e = Math.abs(loss - getLossRate());
+			}
+			return true;
+		case VELOCITY:
+			// pending to define
+			return true;
+		case SIZE:
+			while (e > 0.00001) {
+				if(loss > getLossRate()) {
+					setFlow(getFlow() + rate, REF.SIZE);
+					if(loss < getLossRate()) {
+						setFlow(getFlow() + rate, REF.SIZE);
+						rate /= 10.;
+					}
+				} else {
+					setFlow(getFlow() - rate, REF.SIZE);
+					if(loss > getLossRate() || getFlow() - rate < 0.) {
+						setFlow(getFlow() + rate, REF.SIZE);
+						rate /= 10.;
+					}
+				}
+				e = Math.abs(loss - getLossRate());
+			}
+			return true;
+		default: //LOSS
+			return false;
+		}
+	}
+	
 	public double getLossRate() {
-		return 1000. * getffactor() / getDh() * getVelPressure();
+		return 1000. * getffactor() / getDe() * getVelPressure();
 	}
 	
 	public double getReynolds() {
@@ -196,17 +415,27 @@ public class Duct {
 	
 	private double FColebrook(double f) {
 		return 1 / Math.pow(-2. * Math.log10(getRoughness() / 3.7 / getDh()
-				+ 2.51 / getReynolds() / f), 2.);
+				+ 2.51 / getReynolds() / Math.sqrt(f)), 2.);
+	}
+	
+	private static double[] convertToSize(double d) {
+		double[] size = new double[1];
+		size[0] = Math.abs(d);
+		return size;
 	}
 	
 	public static void main(String[] args){
-		double[] ductsize = {600., 600.};
-		Duct duct1 = new Duct(315, 1.5);
-		duct1.setFlow(950, REF.SIZE);
-		duct1.setRoughness(0.09);
-		System.out.println(duct1.getDh());
-		System.out.println(duct1.getDe());
-		System.out.println(duct1.getVelPressure());
-		System.out.println(duct1.getLossRate());
+		double[] ductsize = {500., 700.};
+		Duct duct1 = new Duct(ductsize, 1.5, TYPE.RECTANGULAR);
+		duct1.fixWidth(false);
+		System.out.println("Ancho: " + duct1.getSize()[0]);
+		System.out.println("Alto: " + duct1.getSize()[1]);
+		System.out.println("Flujo: " + duct1.getFlow());
+		System.out.println("Pérdida: " + duct1.getLossRate());
+		duct1.setLossRate(0.6, REF.LOSS);
+		System.out.println("Ancho: " + duct1.getSize()[0]);
+		System.out.println("Alto: " + duct1.getSize()[1]);
+		System.out.println("Flujo: " + duct1.getFlow());
+		System.out.println("Pérdida: " + duct1.getLossRate());
 	}
 }
