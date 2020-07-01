@@ -1,4 +1,7 @@
 package ductsizer;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 public class Duct {
@@ -425,17 +428,29 @@ public class Duct {
 	}
 	
 	public static void main(String[] args){
-		double[] ductsize = {500., 700.};
-		Duct duct1 = new Duct(ductsize, 1.5, TYPE.RECTANGULAR);
-		duct1.fixWidth(false);
-		System.out.println("Ancho: " + duct1.getSize()[0]);
-		System.out.println("Alto: " + duct1.getSize()[1]);
-		System.out.println("Flujo: " + duct1.getFlow());
-		System.out.println("Pérdida: " + duct1.getLossRate());
-		duct1.setLossRate(0.6, REF.LOSS);
-		System.out.println("Ancho: " + duct1.getSize()[0]);
-		System.out.println("Alto: " + duct1.getSize()[1]);
-		System.out.println("Flujo: " + duct1.getFlow());
-		System.out.println("Pérdida: " + duct1.getLossRate());
+		boolean exit = false;
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		double[] size = new double[2];
+		double flow;
+		while(exit = true) {
+			try {
+				System.out.print("Flow (L/s): ");
+				flow = Double.parseDouble(in.readLine());
+				System.out.print("Width (mm): ");
+				size[0] = Double.parseDouble(in.readLine());
+				System.out.print("Height (mm): ");
+				size[1] = Double.parseDouble(in.readLine());
+				Duct duct1 = new Duct(size, 1.5, TYPE.RECTANGULAR);
+				duct1.setFlow(flow, REF.SIZE);
+				System.out.println("Width (mm):      " + duct1.getSize()[0]);
+				System.out.println("Height (mm):     " + duct1.getSize()[1]);
+				System.out.println("Flow (L/s):      " + duct1.getFlow());
+				System.out.println("Velocity (m/s):  " + duct1.getFluidVelocity());
+				System.out.println("Head loss (Pa/m):" + duct1.getLossRate());
+				System.out.println();
+			} catch (IOException ex) {
+				exit = true;
+			}
+		} 	
 	}
 }

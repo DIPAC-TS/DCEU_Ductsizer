@@ -18,6 +18,9 @@ public class Fitting {
 		SD4_2,
 		CR3_1,
 		CR3_6,
+		CR9_1,
+		CR9_3,
+		CR9_4,
 		ER3_1,
 		ER4_1,
 		ER4_3,
@@ -26,6 +29,7 @@ public class Fitting {
 		SR3_1,
 		SR4_1,
 		SR4_3,
+		SR5_5,
 		SR5_11,
 		SR5_13,
 		SR5_15,
@@ -37,6 +41,7 @@ public class Fitting {
 		Tee,
 		Cross,
 		Transition,
+		Damper,
 		Unclassified
 	}
 	public Fitting(ASHRAE_DB type, double[] param) {
@@ -80,8 +85,27 @@ public class Fitting {
 			a_type = Type.Elbow;
 			a_ASHRAE = ASHRAE_DB.CR3_6;
 			a_nmparam = new String[2];
+			a_nmparam[0] = "H/W";
+			a_nmparam[1] = "th";
+			break;
+		case CR9_1:
+			a_type = Type.Damper;
+			a_ASHRAE = ASHRAE_DB.CR9_1;
+			a_nmparam = new String[2];
 			a_nmparam[0] = "th";
 			a_nmparam[1] = "H/W";
+			break;
+		case CR9_3:
+			a_type = Type.Damper;
+			a_ASHRAE = ASHRAE_DB.CR9_3;
+			a_nmparam = new String[1];
+			a_nmparam[0] = "Parallel and Opposed 3V Blades, Open";
+			break;
+		case CR9_4:
+			a_type = Type.Damper;
+			a_nmparam = new String[1];
+			a_nmparam[0] = "Parallel and Opposed Airfoil Blades, Open";
+			a_ASHRAE = ASHRAE_DB.CR9_4;
 			break;
 		case ER3_1:
 			a_type = Type.Elbow;
@@ -133,6 +157,15 @@ public class Fitting {
 			a_nmparam[1] = "A_0/A_1";
 			break;
 		case SR4_3:
+			break;
+		case SR5_5:
+			a_type = Type.Tee;
+			a_ASHRAE = ASHRAE_DB.SR5_5;
+			a_nmparam = new String[4];
+			a_nmparam[0] = "Q_b/Q_c";
+			a_nmparam[1] = "A_b/A_c";
+			a_nmparam[2] = "Q_s/Q_c";
+			a_nmparam[3] = "A_s/A_c";
 			break;
 		case SR5_11:
 			break;
@@ -226,7 +259,23 @@ public class Fitting {
 					{0.60, 0.59, 0.57, 0.55, 0.52, 0.49, 0.46, 0.43, 0.41, 0.39, 0.38},
 					{0.89, 0.87, 0.84, 0.81, 0.77, 0.73, 0.67, 0.63, 0.61, 0.58, 0.57},
 					{1.30, 1.27, 1.23, 1.18, 1.13, 1.07, 0.98, 0.92, 0.89, 0.85, 0.83}};
-			a_loss[0] = DataTool.interpolate2D(HW1, a_param[1], th1, a_param[0], data4);
+			a_loss[0] = DataTool.interpolate2D(HW1, a_param[0], th1, a_param[1], data4);
+			break;
+		case CR9_1:
+			double[] th7 = {0, 10, 20, 30, 40, 50, 60, 70, 90};
+			double[] HW2 = {0.1, 0.5, 1.0, 1.5, 2.0};
+			double[][] data12 = {{0.04, 0.30, 1.10, 3.0, 8.0, 23., 60.0, 100., 190., 9999.},
+					{0.04, 0.30, 1.10, 3.0, 8.0, 23., 60., 100., 190., 9999.},
+					{0.04, 0.30, 1.10, 3.0, 8.0, 23., 60., 100., 190., 9999.},
+					{0.04, 0.35, 1.25, 3.6, 10., 29., 80., 155., 230., 9999.},
+					{0.04, 0.35, 1.25, 3.6, 10., 29., 80., 155., 230., 9999.}};
+			a_loss[0] = DataTool.interpolate2D(th7, a_param[0], HW2, a_param[1], data12);
+			break;
+		case CR9_3:
+			a_loss[0] = 0.37;
+			break;
+		case CR9_4:
+			a_loss[0] = 0.18;
 			break;
 		case ER3_1:
 			double[] W1W0 = {0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 2.0};
@@ -307,9 +356,47 @@ public class Fitting {
 			break;
 		case SR4_3:
 			break;
+		case SR5_5:
+			double[] QbQc = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
+			double[] AbAc = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
+			double[] QsQc = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
+			double[][] data10_a = {{2.06, 1.20, 0.99, 0.87, 0.88, 0.87, 0.87, 0.86, 0.86},
+					{5.15, 1.92, 1.29, 1.03, 0.99, 0.94, 0.92, 0.90, 0.89},
+					{10.30, 3.12, 1.78, 1.28, 1.16, 1.06, 1.01, 0.97, 0.94},
+					{15.90, 4.35, 2.24, 1.48, 1.11, 0.88, 0.80, 0.75, 0.72},
+					{24.31, 6.31, 3.04, 1.90, 1.35, 1.03, 0.91, 0.83, 0.78},
+					{34.60, 8.70, 4.03, 2.41, 1.65, 1.22, 1.04, 0.94, 0.87},
+					{46.75, 11.53, 5.19, 3.01, 2.00, 1.44, 1.20, 1.06, 0.96},
+					{60.78, 14.79, 6.53, 3.70, 2.40, 1.69, 1.38, 1.20, 1.07},
+					{76.67, 18.49, 8.05, 4.49, 2.86, 1.98, 1.59, 1.36, 1.20}};
+			double[] data10_b = {32.4, 6.4, 2.18, 0.9, 0.4, 0.18, 0.07, 0.03, 0.};
+			a_loss[1] = DataTool.interpolate2D(QbQc, a_param[0], AbAc, a_param[1], data10_a);
+			a_loss[2] = DataTool.interpolate(QsQc, 1. - a_param[0], data10_b);
+ 			break;
 		case SR5_11:
 			break;
 		case SR5_13:
+			double[] range = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
+			double[][] data11_a = {{0.32, 0.33, 0.32, 0.34, 0.32, 0.37, 0.38, 0.39, 0.4},
+					{0.31, 0.32, 0.41, 0.34, 0.32, 0.32, 0.33, 0.34, 0.35},
+					{1.86, 1.65, 0.73, 0.47, 0.37, 0.34, 0.32, 0.32, 0.32},
+					{3.56, 3.10, 1.28, 0.73, 0.51, 0.41, 0.36, 0.34, 0.32},
+					{5.74, 4.93, 2.07, 1.12, 0.73, 0.54, 0.44, 0.38, 0.35},
+					{8.48, 7.24, 3.10, 1.65, 1.03, 0.73, 0.56, 0.47, 0.41},
+					{11.75, 10.00, 4.32, 3.31, 1.42, 0.98, .73, .58, .49},
+					{15.57, 13.22, 5.74, 3.10, 1.90, 1.28, .94, .73, .60},
+					{19.92, 16.90, 7.38, 4.02, 2.46, 1.65, 1.19, .91, .73}};
+			double[][] data11_b = {{0.04, 0.01, 0., 0., 0., 0., 0., 0., 0.},
+			{0.98, 0.04, 0.01, 0., 0., 0., 0., 0., 0.},
+			{3.48, 0.31, 0.04, 0.01, 0., 0., 0., 0., 0.},
+			{7.55, 0.98, 0.18, 0.04, 0.02, 0., 0., 0., 0.},
+			{13.18, 2.03, 0.49, 0.13, 0.04, 0., 0.01, 0., 0.},
+			{20.38, 3.48, 0.98, 0.31, 0.10, 0.04, 0.02, 0.01, 0.},
+			{29.15, 5.32, 1.64, 0.60, 0.23, 0.09, 0.04, 0.02, 0.01},
+			{39.48, 7.55, 2.47, 0.98, 0.42, 0.18, 0.08, 0.04, 0.02},
+			{51.37, 10.17, 3.48, 1.46, 0.67, 0.31, 0.15, 0.07, 0.04}};
+			a_loss[1] = DataTool.interpolate2D(range, a_param[0], range, a_param[1], data11_a);
+			a_loss[2] = DataTool.interpolate2D(range, 1 - a_param[0], range, 1 - a_param[1], data11_b);
 			break;
 		case SR5_15:
 			break;
@@ -355,217 +442,270 @@ public class Fitting {
 	}
 	
 	public static void main(String args[]) {
+		boolean exit = false;
+		boolean flag = false;
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		double D0, D1, H0, H1, W0, W1, rW, th, Qb, Qc;
 		double[] param = new double[4];
 		String sel;
 		ASHRAE_DB fitt = ASHRAE_DB.CUSTOM;
-		boolean flag = false;
 		try {
-			while(flag == false) {
-				for(ASHRAE_DB val : ASHRAE_DB.values()) {
-					System.out.println(val.toString().replace('_', '-'));
-				}
-				System.out.print("Select an option:");
-				sel = in.readLine();
-				for(ASHRAE_DB val : ASHRAE_DB.values()) {
-					if (sel.replace('-', '_').compareTo(val.toString()) == 0) {
-						fitt = val;
-						flag = true;
-						continue;
+			while(exit == false) {
+				while(flag == false) {
+					for(ASHRAE_DB val : ASHRAE_DB.values()) {
+						System.out.println(val.toString().replace('_', '-'));
+					}
+					System.out.print("Select an option:");
+					sel = in.readLine();
+					for(ASHRAE_DB val : ASHRAE_DB.values()) {
+						if (sel.replace('-', '_').compareTo(val.toString()) == 0) {
+							fitt = val;
+							flag = true;
+							break;
+						}
 					}
 				}
-			}
-			switch (fitt){
-				case CD3_1:{
-					double D;
-					System.out.print("D: ");
-					D = Double.parseDouble(in.readLine());
-					param[0] = D;
-					Fitting CD31 = new Fitting(Fitting.ASHRAE_DB.CD3_1, param);
-					System.out.println(CD31.report(0));
-					break;
+				switch (fitt){
+					case CD3_1:{
+						System.out.print("D: ");
+						D0 = Double.parseDouble(in.readLine());
+						param[0] = D0;
+						Fitting CD31 = new Fitting(Fitting.ASHRAE_DB.CD3_1, param);
+						System.out.println(CD31.report(0));
+						break;
+					}
+					case CD3_3:{
+						System.out.print("D: ");
+						D0 = Double.parseDouble(in.readLine());
+						param[0] = D0;
+						Fitting CD33 = new Fitting(Fitting.ASHRAE_DB.CD3_3, param);
+						System.out.println(CD33.report(0));
+						break;
+					}
+					case CR3_1:{
+						System.out.print("W: ");
+						W0 = Double.parseDouble(in.readLine());
+						System.out.print("H: ");
+						H0 = Double.parseDouble(in.readLine());
+						System.out.print("r/W: ");
+						rW = Double.parseDouble(in.readLine());
+						System.out.println("th: ");
+						th = Double.parseDouble(in.readLine());
+						param[0] = th;
+						param[1] = H0 / W0;
+						param[2] = rW;
+						Fitting CR31 = new Fitting(Fitting.ASHRAE_DB.CR3_1, param);
+						System.out.println(CR31.report(0));
+						break;
+					}
+					case SD4_1:{
+						System.out.println("D0: ");
+						D0 = Double.parseDouble(in.readLine());
+						System.out.println("D1: ");
+						D1 = Double.parseDouble(in.readLine());
+						System.out.println("th: ");
+						th = Double.parseDouble(in.readLine());
+						param[0] = th;
+						param[1] = D0 * D0 / D1 / D1;
+						Fitting SD41 = new Fitting(Fitting.ASHRAE_DB.SD4_1, param);
+						System.out.println(SD41.report(0));
+						break;
+					}
+					case SD4_2:{
+						System.out.println("D0: ");
+						D0 = Double.parseDouble(in.readLine());
+						System.out.println("W1: ");
+						W1 = Double.parseDouble(in.readLine());
+						System.out.println("H1: ");
+						H1 = Double.parseDouble(in.readLine());
+						System.out.println("th: ");
+						th = Double.parseDouble(in.readLine());
+						param[0] = th;
+						param[1] = Math.PI * D0 * D0 / W1 / H1 / 4.;
+						Fitting SD42 = new Fitting(Fitting.ASHRAE_DB.SD4_2, param);
+						System.out.println(SD42.report(0));
+						break;
+					}
+					case CR3_6:{
+						System.out.print("W: ");
+						W0 = Double.parseDouble(in.readLine());
+						System.out.print("H: ");
+						H0 = Double.parseDouble(in.readLine());
+						System.out.print("th: ");
+						th = Double.parseDouble(in.readLine());
+						param[0] = H0 / W0;
+						param[1] = th;
+						Fitting CR36 = new Fitting(Fitting.ASHRAE_DB.CR3_6, param);
+						System.out.println(CR36.report(0));
+						break;
+					}
+					case CR9_1:
+						System.out.print("W: ");
+						W0 = Double.parseDouble(in.readLine());
+						System.out.print("H: ");
+						H0 = Double.parseDouble(in.readLine());
+						System.out.print("th: ");
+						th = Double.parseDouble(in.readLine());
+						param[0] = th;
+						param[1] = H0 / W0;
+						Fitting CR91 = new Fitting(Fitting.ASHRAE_DB.CR9_1, param);
+						System.out.println(CR91.report(0));
+						break;
+					case CR9_3:
+						Fitting CR93 = new Fitting(Fitting.ASHRAE_DB.CR9_3, param);
+						System.out.println(CR93.report(0));
+						break;
+					case CR9_4:
+						Fitting CR94 = new Fitting(Fitting.ASHRAE_DB.CR9_4, param);
+						System.out.println(CR94.report(0));
+						break;
+					case ER3_1:{
+						System.out.print("W0: ");
+						W0 = Double.parseDouble(in.readLine());
+						System.out.print("H: ");
+						H0 = Double.parseDouble(in.readLine());
+						System.out.print("W1: ");
+						W1 = Double.parseDouble(in.readLine());
+						param[0] = W1 / W0;
+						param[1] = H0 / W0;
+						Fitting ER31 = new Fitting(Fitting.ASHRAE_DB.ER3_1, param);
+						System.out.println(ER31.report(0));
+						break;
+					}
+					case ER4_1:{
+						System.out.print("Hin: ");
+						H0 = Double.parseDouble(in.readLine());
+						System.out.print("Hout: ");
+						H1 = Double.parseDouble(in.readLine());
+						System.out.print("th: ");
+						th = Double.parseDouble(in.readLine());
+						param[0] = th;
+						param[1] = H0 / H1;
+						Fitting ER41 = new Fitting(Fitting.ASHRAE_DB.ER4_1, param);
+						System.out.println(ER41.report(0));
+						break;
+					}
+					case ER4_3:{
+						System.out.print("W: ");
+						W0 = Double.parseDouble(in.readLine());
+						System.out.print("H: ");
+						H0 = Double.parseDouble(in.readLine());
+						System.out.print("D: ");
+						D0 = Double.parseDouble(in.readLine());
+						System.out.print("th: ");
+						th = Double.parseDouble(in.readLine());
+						param[0] = th;
+						param[1] = W0 * H0 / D0 / D0 * 4 / Math.PI;
+						Fitting ER43 = new Fitting(Fitting.ASHRAE_DB.ER4_3, param);
+						System.out.println(ER43.report(0));
+						break;
+					}
+					case ER5_2:{
+						System.out.print("Qc: ");
+						Qc = Double.parseDouble(in.readLine());
+						System.out.print("Qb: ");
+						Qb = Double.parseDouble(in.readLine());
+						param[0] = Qb / Qc;
+						param[1] = 1. - param[0];
+						Fitting ER52 = new Fitting(Fitting.ASHRAE_DB.ER5_2, param);
+						System.out.println(ER52.report(0));
+						System.out.println(ER52.report(1));
+						break;
+					}
+					case ER5_3:{
+						System.out.print("Qc: ");
+						Qc = Double.parseDouble(in.readLine());
+						System.out.print("Qb: ");
+						Qb = Double.parseDouble(in.readLine());
+						param[0] = Qb / Qc;
+						param[1] = 1. - param[0];
+						Fitting ER53 = new Fitting(Fitting.ASHRAE_DB.ER5_3, param);
+						System.out.println(ER53.report(0));
+						System.out.println(ER53.report(1));
+						break;
+					}
+					case SR3_1:{
+						System.out.print("W0: ");
+						W0 = Double.parseDouble(in.readLine());
+						System.out.print("H: ");
+						H0 = Double.parseDouble(in.readLine());
+						System.out.print("W1: ");
+						W1 = Double.parseDouble(in.readLine());
+						param[0] = W0 / W1;
+						param[1] = H0 / W1;
+						Fitting SR31 = new Fitting(Fitting.ASHRAE_DB.SR3_1, param);
+						System.out.println(SR31.report(0));
+						break;
+					}
+					case SR4_1:{
+						System.out.print("th: ");
+						th = Double.parseDouble(in.readLine());
+						System.out.print("Hin: ");
+						H1 = Double.parseDouble(in.readLine());
+						System.out.print("Hout: ");
+						H0 = Double.parseDouble(in.readLine());
+						param[0] = th;
+						param[1] = H0 / H1;
+						Fitting SR41 = new Fitting(Fitting.ASHRAE_DB.SR4_1, param);
+						System.out.println(SR41.report(0));
+						break;
+					}
+					case SR4_3:
+						break;
+					case SR5_5:
+						System.out.print("W_c: ");
+						W0 = Double.parseDouble(in.readLine());
+						System.out.print("H_c: ");
+						H0 = Double.parseDouble(in.readLine());
+						System.out.print("Q_c: ");;
+						Qc = Double.parseDouble(in.readLine());
+						System.out.print("W_b: ");
+						W1 = Double.parseDouble(in.readLine());
+						System.out.print("Q_c: ");;
+						Qb = Double.parseDouble(in.readLine());
+						param[0] = Qb / Qc;
+						param[1] = W1 / W0;
+						param[2] = 1. - param[0];
+						param[3] = 1. - param[1];
+						Fitting SR55 = new Fitting(Fitting.ASHRAE_DB.SR5_5, param);
+						System.out.println(SR55.report(0));
+						System.out.println(SR55.report(1));
+						break;
+					case SR5_11:
+						break;
+					case SR5_13:
+						System.out.print("W_c: ");
+						W0 = Double.parseDouble(in.readLine());
+						System.out.print("H_c: ");
+						H0 = Double.parseDouble(in.readLine());
+						System.out.print("Q_c: ");;
+						Qc = Double.parseDouble(in.readLine());
+						System.out.print("W_b: ");
+						W1 = Double.parseDouble(in.readLine());
+						System.out.print("H_b: ");
+						H1 = Double.parseDouble(in.readLine());
+						System.out.print("Q_c: ");;
+						Qb = Double.parseDouble(in.readLine());
+						param[0] = Qb / Qc;
+						param[1] = W1 * H1 / W0 / H0;
+						param[2] = 1. - param[0];
+						param[3] = 1. - param[1];
+						Fitting SR513 = new Fitting(Fitting.ASHRAE_DB.SR5_5, param);
+						System.out.println(SR513.report(0));
+						System.out.println(SR513.report(1));
+						break;
+					case SR5_15:
+						break;
+					default:
+						break;
 				}
-				case CD3_3:{
-					double D;
-					System.out.print("D: ");
-					D = Double.parseDouble(in.readLine());
-					param[0] = D;
-					Fitting CD33 = new Fitting(Fitting.ASHRAE_DB.CD3_3, param);
-					System.out.println(CD33.report(0));
-					break;
-				}
-				case CR3_1:{
-					double H, W, rW, th;
-					System.out.print("W: ");
-					W = Double.parseDouble(in.readLine());
-					System.out.print("H: ");
-					H = Double.parseDouble(in.readLine());
-					System.out.print("r/W: ");
-					rW = Double.parseDouble(in.readLine());
-					System.out.println("th: ");
-					th = Double.parseDouble(in.readLine());
-					param[0] = th;
-					param[1] = H / W;
-					param[2] = rW;
-					Fitting CR31 = new Fitting(Fitting.ASHRAE_DB.CR3_1, param);
-					System.out.println(CR31.report(0));
-					break;
-				}
-				case SD4_1:{
-					double D0, D1, th;
-					System.out.println("D0: ");
-					D0 = Double.parseDouble(in.readLine());
-					System.out.println("D1: ");
-					D1 = Double.parseDouble(in.readLine());
-					System.out.println("th: ");
-					th = Double.parseDouble(in.readLine());
-					param[0] = th;
-					param[1] = D0 * D0 / D1 / D1;
-					Fitting SD41 = new Fitting(Fitting.ASHRAE_DB.SD4_1, param);
-					System.out.println(SD41.report(0));
-					break;
-				}
-				case SD4_2:{
-					double D0, H1, W1, th;	
-					System.out.println("D0: ");
-					D0 = Double.parseDouble(in.readLine());
-					System.out.println("W1: ");
-					W1 = Double.parseDouble(in.readLine());
-					System.out.println("H1: ");
-					H1 = Double.parseDouble(in.readLine());
-					System.out.println("th: ");
-					th = Double.parseDouble(in.readLine());
-					param[0] = th;
-					param[1] = Math.PI * D0 * D0 / W1 / H1 / 4.;
-					Fitting SD42 = new Fitting(Fitting.ASHRAE_DB.SD4_2, param);
-					System.out.println(SD42.report(0));
-					break;
-				}
-				case CR3_6:{
-					double H, W, th;
-					System.out.print("W: ");
-					W = Double.parseDouble(in.readLine());
-					System.out.print("H: ");
-					H = Double.parseDouble(in.readLine());
-					System.out.print("th: ");
-					th = Double.parseDouble(in.readLine());
-					param[0] = th;
-					param[1] = H / W;
-					Fitting CR36 = new Fitting(Fitting.ASHRAE_DB.CR3_6, param);
-					System.out.println(CR36.report(0));
-					break;
-				}
-				case ER3_1:{
-					double H, W0, W1;
-					System.out.print("W0: ");
-					W0 = Double.parseDouble(in.readLine());
-					System.out.print("H: ");
-					H = Double.parseDouble(in.readLine());
-					System.out.print("W1: ");
-					W1 = Double.parseDouble(in.readLine());
-					param[0] = W1 / W0;
-					param[1] = H / W0;
-					Fitting ER31 = new Fitting(Fitting.ASHRAE_DB.ER3_1, param);
-					System.out.println(ER31.report(0));
-					break;
-				}
-				case ER4_1:{
-					double th, H0, H1;
-					System.out.print("Hin: ");
-					H0 = Double.parseDouble(in.readLine());
-					System.out.print("Hout: ");
-					H1 = Double.parseDouble(in.readLine());
-					System.out.print("th: ");
-					th = Double.parseDouble(in.readLine());
-					param[0] = th;
-					param[1] = H0 / H1;
-					Fitting ER41 = new Fitting(Fitting.ASHRAE_DB.ER4_1, param);
-					System.out.println(ER41.report(0));
-					break;
-				}
-				case ER4_3:{
-					double th, W, H, D;
-					System.out.print("W: ");
-					W = Double.parseDouble(in.readLine());
-					System.out.print("H: ");
-					H = Double.parseDouble(in.readLine());
-					System.out.print("D: ");
-					D = Double.parseDouble(in.readLine());
-					System.out.print("th: ");
-					th = Double.parseDouble(in.readLine());
-					param[0] = th;
-					param[1] = W * H / D / D * 4 / Math.PI;
-					Fitting ER43 = new Fitting(Fitting.ASHRAE_DB.ER4_3, param);
-					System.out.println(ER43.report(0));
-					break;
-				}
-				case ER5_2:{
-					double Qb, Qc;
-					System.out.print("Qc: ");
-					Qc = Double.parseDouble(in.readLine());
-					System.out.print("Qb: ");
-					Qb = Double.parseDouble(in.readLine());
-					param[0] = Qb / Qc;
-					param[1] = 1. - param[0];
-					Fitting ER52 = new Fitting(Fitting.ASHRAE_DB.ER5_2, param);
-					System.out.println(ER52.report(0));
-					System.out.println(ER52.report(1));
-					break;
-				}
-				case ER5_3:{
-					double Qb, Qc;
-					System.out.print("Qc: ");
-					Qc = Double.parseDouble(in.readLine());
-					System.out.print("Qb: ");
-					Qb = Double.parseDouble(in.readLine());
-					param[0] = Qb / Qc;
-					param[1] = 1. - param[0];
-					Fitting ER53 = new Fitting(Fitting.ASHRAE_DB.ER5_3, param);
-					System.out.println(ER53.report(0));
-					System.out.println(ER53.report(1));
-					break;
-				}
-				case SR3_1:{
-					double W0, W1, H;
-					System.out.print("W0: ");
-					W0 = Double.parseDouble(in.readLine());
-					System.out.print("H: ");
-					H = Double.parseDouble(in.readLine());
-					System.out.print("W1: ");
-					W1 = Double.parseDouble(in.readLine());
-					param[0] = W0 / W1;
-					param[1] = H / W1;
-					Fitting SR31 = new Fitting(Fitting.ASHRAE_DB.SR3_1, param);
-					System.out.println(SR31.report(0));
-					break;
-				}
-				case SR4_1:{
-					double th, H0, H1;
-					System.out.print("th: ");
-					th = Double.parseDouble(in.readLine());
-					System.out.print("Hin: ");
-					H1 = Double.parseDouble(in.readLine());
-					System.out.print("Hout: ");
-					H0 = Double.parseDouble(in.readLine());
-					param[0] = th;
-					param[1] = H0 / H1;
-					Fitting SR41 = new Fitting(Fitting.ASHRAE_DB.SR4_1, param);
-					System.out.println(SR41.report(0));
-					break;
-				}
-				case SR4_3:
-					break;
-				case SR5_11:
-					break;
-				case SR5_13:
-					break;
-				case SR5_15:
-					break;
-				default:
-					break;
+				System.out.println("Press any key to continue:");
+				in.readLine();
+				flag = false;
 			}
 		} catch (IOException ex){
 			System.out.println(ex.getMessage());
+			exit = true;
 		}
 	}
 }
