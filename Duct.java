@@ -229,26 +229,26 @@ public class Duct {
 	public double getA() {
 		switch (a_type) {
 			case RECTANGULAR:{
-				return a_size[0] * a_size[1];
+				return a_size[0] * a_size[1] / 1.e6;
 			}
 			case ROUND:{
-				return Math.PI * a_size[0] * a_size[0] / 4.;
+				return Math.PI * a_size[0] * a_size[0] / 4.e6;
 			}
 			default:{//OVAL
-				return Math.PI * a_size[1] * a_size[1] / 4.
-						+ a_size[1] * (a_size[0] - a_size[1]);
+				return Math.PI * a_size[1] * a_size[1] / 4.e6
+						+ a_size[1] * (a_size[0] - a_size[1]) / 1.e6;
 			}
 		}
 	}
 	
 	public double getFluidA() {
-		return Math.PI * getDe() * getDe() / 4.;
+		return Math.PI * getDe() * getDe() / 4.e6;
 	}
 	
 	public double getP() {
 		switch (a_type) {
 			case RECTANGULAR:{
-				return 2 * (a_size[0] + a_size[1]);
+				return 2. * (a_size[0] + a_size[1]);
 			}
 			case ROUND:{
 				return Math.PI * a_size[0];
@@ -263,7 +263,7 @@ public class Duct {
 		if (a_type == TYPE.ROUND) {
 			return a_size[0];
 		} else {
-			return 4 * getA() / getP();
+			return 4.e6 * getA() / getP();
 		}
 	}
 	
@@ -310,7 +310,7 @@ public class Duct {
 			}
 			return true;
 		case ROUND:
-			a_size[0] = d * getP() / getA() / 4.;
+			a_size[0] = d * getP() / getA() / 4.e6;
 			return true;
 		default: //OVAL
 			// To define
@@ -319,7 +319,7 @@ public class Duct {
 	}
 	
 	public double getVelocity(){
-		return a_flow / getA() * 1000.;
+		return a_flow / getA() / 1000.;
 	}
 	
 	public boolean setFluidVelocity(double v, REF ref) {
@@ -341,7 +341,7 @@ public class Duct {
 	}
 	
 	public double getFluidVelocity() {
-		return a_flow / getFluidA() * 1000.;
+		return a_flow / getFluidA() / 1000.;
 	}
 	
 	public double getVelPressure() {
@@ -417,7 +417,7 @@ public class Duct {
 	}
 	
 	private double FColebrook(double f) {
-		return 1 / Math.pow(-2. * Math.log10(getRoughness() / 3.7 / getDh()
+		return 1. / Math.pow(-2. * Math.log10(getRoughness() / 3.7 / getDh()
 				+ 2.51 / getReynolds() / Math.sqrt(f)), 2.);
 	}
 	
@@ -432,7 +432,7 @@ public class Duct {
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		double[] size = new double[2];
 		double flow;
-		while(exit = true) {
+		while(exit != true) {
 			try {
 				System.out.print("Flow (L/s): ");
 				flow = Double.parseDouble(in.readLine());
@@ -442,10 +442,16 @@ public class Duct {
 				size[1] = Double.parseDouble(in.readLine());
 				Duct duct1 = new Duct(size, 1.5, TYPE.RECTANGULAR);
 				duct1.setFlow(flow, REF.SIZE);
+				System.out.println("Flow (L/s):      " + duct1.getFlow());
 				System.out.println("Width (mm):      " + duct1.getSize()[0]);
 				System.out.println("Height (mm):     " + duct1.getSize()[1]);
-				System.out.println("Flow (L/s):      " + duct1.getFlow());
-				System.out.println("Velocity (m/s):  " + duct1.getFluidVelocity());
+				System.out.println("Eq. Diam. (mm):  " + duct1.getDe());
+				System.out.println("Hid. Diam. (mm): " + duct1.getDh());
+				System.out.println("Flow Area (m2):  " + duct1.getFluidA());
+				System.out.println("Fluid Vel. (m/s):" + duct1.getFluidVelocity());
+				System.out.println("Reynolds (-):    " + duct1.getReynolds());
+				System.out.println("Friction fac.(-):" + duct1.getffactor());
+				System.out.println("Vel. Press. (Pa):" + duct1.getVelPressure());
 				System.out.println("Head loss (Pa/m):" + duct1.getLossRate());
 				System.out.println();
 			} catch (IOException ex) {
