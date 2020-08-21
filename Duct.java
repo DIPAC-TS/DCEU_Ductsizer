@@ -429,22 +429,50 @@ public class Duct {
 	
 	public static void main(String[] args){
 		boolean exit = false;
+		int stype = 0;
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-		double[] size = new double[2];
+		double[] size;
 		double flow;
+		Duct duct1;
 		while(exit != true) {
 			try {
+				System.out.println();
+				if (stype == 0) {
+					System.out.println("1. Round");
+					System.out.println("2. Rectangular");
+					System.out.println("3. Oval");
+					System.out.print("Select type:");
+					stype = Integer.parseInt(in.readLine());
+					stype = (stype > 3 || stype < 1) ? 1: stype;
+				}
 				System.out.print("Flow (L/s): ");
 				flow = Double.parseDouble(in.readLine());
-				System.out.print("Width (mm): ");
-				size[0] = Double.parseDouble(in.readLine());
-				System.out.print("Height (mm): ");
-				size[1] = Double.parseDouble(in.readLine());
-				Duct duct1 = new Duct(size, 1.5, TYPE.RECTANGULAR);
+				if (stype == 1) {
+					size = new double[1];
+					System.out.print("Diameter (mm): ");
+					size[0] = Double.parseDouble(in.readLine());
+					duct1 = new Duct(size, 1.5, TYPE.ROUND);
+				} else {
+					size = new double[2];
+					System.out.print("Width (mm): ");
+					size[0] = Double.parseDouble(in.readLine());
+					System.out.print("Height (mm): ");
+					size[1] = Double.parseDouble(in.readLine());
+					if (stype == 2)
+						duct1 = new Duct(size, 1.5, TYPE.RECTANGULAR);
+					else 
+						duct1 = new Duct(size, 1.5, TYPE.OVAL);
+				}
 				duct1.setFlow(flow, REF.SIZE);
+				System.out.println();
+				System.out.println("RESULTS:");
 				System.out.println("Flow (L/s):      " + duct1.getFlow());
-				System.out.println("Width (mm):      " + duct1.getSize()[0]);
-				System.out.println("Height (mm):     " + duct1.getSize()[1]);
+				if (stype == 1)
+					System.out.println("Diameter (mm):   " + duct1.getSize()[0]);
+				else {
+					System.out.println("Width (mm):      " + duct1.getSize()[0]);
+					System.out.println("Height (mm):     " + duct1.getSize()[1]);
+				}
 				System.out.println("Eq. Diam. (mm):  " + duct1.getDe());
 				System.out.println("Hid. Diam. (mm): " + duct1.getDh());
 				System.out.println("Flow Area (m2):  " + duct1.getFluidA());
@@ -454,8 +482,13 @@ public class Duct {
 				System.out.println("Vel. Press. (Pa):" + duct1.getVelPressure());
 				System.out.println("Head loss (Pa/m):" + duct1.getLossRate());
 				System.out.println();
+				System.out.print("Type '0' to change type: ");
+				stype = (Integer.parseInt(in.readLine()) == 0) ? 0: stype;
 			} catch (IOException ex) {
 				exit = true;
+				stype = 0;
+			} catch (NumberFormatException ex) {
+				//No action required
 			}
 		} 	
 	}

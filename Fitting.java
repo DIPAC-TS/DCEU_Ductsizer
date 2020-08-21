@@ -376,7 +376,7 @@ public class Fitting {
 		case SR5_5:
 			double[] QbQc = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
 			double[] AbAc = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
-			double[] QsQc = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
+			double[] QsQc = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 1.0};
 			double[][] data10_a = {{2.06, 1.20, 0.99, 0.87, 0.88, 0.87, 0.87, 0.86, 0.86},
 					{5.15, 1.92, 1.29, 1.03, 0.99, 0.94, 0.92, 0.90, 0.89},
 					{10.30, 3.12, 1.78, 1.28, 1.16, 1.06, 1.01, 0.97, 0.94},
@@ -474,6 +474,7 @@ public class Fitting {
 					}
 					System.out.print("Select an option:");
 					sel = in.readLine();
+					sel = sel.toUpperCase();
 					for(ASHRAE_DB val : ASHRAE_DB.values()) {
 						if (sel.replace('-', '_').compareTo(val.toString()) == 0) {
 							fitt = val;
@@ -506,7 +507,7 @@ public class Fitting {
 						H0 = Double.parseDouble(in.readLine());
 						System.out.print("r/W: ");
 						rW = Double.parseDouble(in.readLine());
-						System.out.println("th: ");
+						System.out.print("th: ");
 						th = Double.parseDouble(in.readLine());
 						param[0] = th;
 						param[1] = H0 / W0;
@@ -622,7 +623,7 @@ public class Fitting {
 						break;
 					}
 					case ER5_2:{
-						System.out.print("Qc: ");
+						System.out.print("Qout: ");
 						Qc = Double.parseDouble(in.readLine());
 						System.out.print("Qb: ");
 						Qb = Double.parseDouble(in.readLine());
@@ -634,7 +635,7 @@ public class Fitting {
 						break;
 					}
 					case ER5_3:{
-						System.out.print("Qc: ");
+						System.out.print("Qout: ");
 						Qc = Double.parseDouble(in.readLine());
 						System.out.print("Qb: ");
 						Qb = Double.parseDouble(in.readLine());
@@ -659,12 +660,12 @@ public class Fitting {
 						break;
 					}
 					case SR4_1:{
-						System.out.print("th: ");
-						th = Double.parseDouble(in.readLine());
 						System.out.print("Hin: ");
 						H1 = Double.parseDouble(in.readLine());
 						System.out.print("Hout: ");
 						H0 = Double.parseDouble(in.readLine());
+						System.out.print("th: ");
+						th = Double.parseDouble(in.readLine());
 						param[0] = th;
 						param[1] = H0 / H1;
 						Fitting SR41 = new Fitting(Fitting.ASHRAE_DB.SR4_1, param);
