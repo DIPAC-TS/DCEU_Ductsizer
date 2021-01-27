@@ -1,4 +1,4 @@
-   package ductsizer;
+package DCEU_ductsizer;
 
 import java.util.ArrayList;
 

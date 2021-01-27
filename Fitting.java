@@ -1,4 +1,4 @@
-package ductsizer;
+package DCEU_ductsizer;
 import maths.DataTool;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -16,6 +16,7 @@ public class Fitting {
 		CD3_3,
 		SD4_1,
 		SD4_2,
+		SD5_1,
 		CR3_1,
 		CR3_6,
 		CR3_9,
@@ -43,7 +44,8 @@ public class Fitting {
 		Cross,
 		Transition,
 		Damper,
-		Unclassified
+		Unclassified,
+		Wye
 	}
 	public Fitting(ASHRAE_DB type, double[] param) {
 		a_loss = new double[3];
@@ -73,6 +75,14 @@ public class Fitting {
 			a_nmparam = new String[2];
 			a_nmparam[0] = "th";
 			a_nmparam[1] = "A_0/A_1";
+			break;
+		case SD5_1:
+			a_type = Type.Wye;
+			a_ASHRAE = ASHRAE_DB.SD5_1;
+			a_nmparam = new String[3];
+			a_nmparam[0] = "Q_b/Q_c";
+			a_nmparam[1] = "A_b/A_c";
+			a_nmparam[2] = "A_s/A_c";
 			break;
 		case CR3_1:
 			a_type = Type.Elbow;
@@ -164,6 +174,11 @@ public class Fitting {
 			a_nmparam[1] = "A_0/A_1";
 			break;
 		case SR4_3:
+			a_type = Type.Transition;
+			a_ASHRAE = ASHRAE_DB.SR4_3;
+			a_nmparam = new String[2];
+			a_nmparam[0] = "th";
+			a_nmparam[1] = "A_0/A_1";
 			break;
 		case SR5_5:
 			a_type = Type.Tee;
@@ -247,6 +262,37 @@ public class Fitting {
 			};
 			
 			a_loss[0] = DataTool.interpolate2D(th6, a_param[0], A0A1b, a_param[1], data11);
+			break;
+		case SD5_1:
+			double[] QbQc = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
+			double[] AbAc = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
+			double[] AsAc = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
+			double[][] datasd51a = {
+					{0.38, 0.38, 0.48, 0.45, 0.40, 0.36, 0.32, 0.29, 0.26},
+					{2.25, 0.38, 0.31, 0.38, 0.47, 0.48, 0.47, 0.45, 0.42},
+					{6.29, 1.02, 0.38, 0.30, 0.33, 0.38, 0.45, 0.48, 0.48},
+					{12.41, 2.25, 0.74, 0.38, 0.30, 0.31, 0.35, 0.38, 0.45},
+					{20.58, 4.01, 1.37, 0.62, 0.38, 0.30, 0.30, 0.32, 0.36},
+					{30.78, 6.29, 2.25, 1.02, 0.56, 0.38, 0.31, 0.30, 0.31},
+					{43.02, 9.10, 3.36, 1.57, 0.85, 0.52, 0.38, 0.31, 0.30},
+					{57.29, 12.41, 4.71, 2.25, 1.22, 0.74, 0.50, 0.38, 0.32},
+					{73.59, 16.24, 6.29, 3.06, 1.69, 1.02, 0.67, 0.48, 0.38},
+					{91.92, 20.58, 8.11, 4.01, 2.25, 1.37, 0.90, 0.62, 0.47}
+			    };
+			double[][] datasd51b = {
+					{0.13, 0.24, 0.57, 0.74, 0.74, 0.70, 0.65, 0.60, 0.56},
+					{0.20, 0.13, 0.15, 0.16, 0.28, 0.57, 0.69, 0.74, 0.75},
+					{0.90, 0.14, 0.13, 0.14, 0.15, 0.16, 0.20, 0.42, 0.57},
+					{2.88, 0.20, 0.14, 0.13, 0.14, 0.15, 0.15, 0.16, 0.34},
+					{6.25, 0.38, 0.17, 0.14, 0.13, 0.14, 0.14, 0.15, 0.15},
+					{11.88, 0.90, 0.20, 0.14, 0.14, 0.13, 0.14, 0.14, 0.15},
+					{18.62, 1.72, 0.33, 0.18, 0.16, 0.14, 0.13, 0.15, 0.14},
+					{26.88, 2.88, 0.50, 0.20, 0.15, 0.14, 0.13, 0.13, 0.14},
+					{36.45, 4.46, 0.90, 0.30, 0.19, 0.16, 0.15, 0.14, 0.13},
+					{45.0, 6.25, 1.44, 0.38, 0.20, 0.17, 0.12, 0.13, 0.14},
+			    };
+			a_loss[0] = DataTool.interpolate2D(QbQc, a_param[0], AbAc, a_param[1], datasd51a);
+			a_loss[1] = DataTool.interpolate2D(QbQc, 1 - a_param[0], AsAc, a_param[2], datasd51b);
 			break;
 		case CR3_1:
 			double[] HW = {0.25, 0.50, 0.75, 1.0, 1.5, 2.0, 3.0, 4.0, 5.0, 6.0, 8.0};
@@ -372,10 +418,23 @@ public class Fitting {
 			a_loss[0] = DataTool.interpolate2D(th4, a_param[0], A0A1_2, a_param[1], data9);
 			break;
 		case SR4_3:
+			double[] thsr43 = {0., 3., 5., 10., 15., 20., 30., 45., 60., 90., 120., 150., 180.,};
+			double[] A0A1_sr43 = {0.10, 0.16, 0.25, 0.50, 1.00, 2.00, 4.00, 6.00, 10.0, 16.0};
+			double[][] datasr43 = {{0.0, 0.12, 0.09, 0.05, 0.05, 0.05, 0.05, 0.06, 0.08, 0.19, 0.29, 0.37, 0.43},
+					{0.0, 0.11, 0.08, 0.05, 0.05, 0.05, 0.05, 0.06, 0.07, 0.19, 0.28, 0.37, 0.42},
+					{0.0, 0.10, 0.07, 0.05, 0.05, 0.05, 0.05, 0.06, 0.07, 0.17, 0.27, 0.35, 0.41},
+					{0.0, 0.08, 0.07, 0.06, 0.07, 0.06, 0.05, 0.06, 0.07, 0.13, 0.19, 0.23, 0.24},
+					{0.0, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00},
+					{0.0, 0.57, 0.55, 0.61, 0.87, 1.00, 1.20, 1.30, 1.30, 1.30, 1.28, 1.24, 1.20},
+					{0.0, 2.60, 2.84, 3.92, 5.72, 7.20, 8.32, 9.28, 9.92, 10.24, 10.24, 10.24, 10.24},
+					{0.0, 6.57, 6.75, 10.62, 15.84, 18.90, 22.50, 25.74, 27.90, 28.44, 28.44, 28.35, 28.26},
+					{0.0, 17.25, 18.75, 30.00, 45.00, 53.00, 63.50, 75.00, 84.0, 89.00, 89.00, 88.50, 88.0},
+					{0.0, 42.75, 48.13, 77.57, 116.74, 136.45, 164.10, 196.86, 224.26, 241.92, 241.92, 240.38, 238.59}};
+			a_loss[0] = DataTool.interpolate2D(thsr43, a_param[0], A0A1_sr43, a_param[1], datasr43);
 			break;
 		case SR5_5:
-			double[] QbQc = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
-			double[] AbAc = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
+			double[] QbQc1 = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
+			double[] AbAc1 = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
 			double[] QsQc = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 1.0};
 			double[][] data10_a = {{2.06, 1.20, 0.99, 0.87, 0.88, 0.87, 0.87, 0.86, 0.86},
 					{5.15, 1.92, 1.29, 1.03, 0.99, 0.94, 0.92, 0.90, 0.89},
@@ -387,7 +446,7 @@ public class Fitting {
 					{60.78, 14.79, 6.53, 3.70, 2.40, 1.69, 1.38, 1.20, 1.07},
 					{76.67, 18.49, 8.05, 4.49, 2.86, 1.98, 1.59, 1.36, 1.20}};
 			double[] data10_b = {32.4, 6.4, 2.18, 0.9, 0.4, 0.18, 0.07, 0.03, 0.};
-			a_loss[0] = DataTool.interpolate2D(QbQc, a_param[0], AbAc, a_param[1], data10_a);
+			a_loss[0] = DataTool.interpolate2D(QbQc1, a_param[0], AbAc1, a_param[1], data10_a);
 			a_loss[1] = DataTool.interpolate(QsQc, 1. - a_param[0], data10_b);
  			break;
 		case SR5_11:
@@ -462,7 +521,7 @@ public class Fitting {
 		boolean exit = false;
 		boolean flag = false;
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-		double D0, D1, H0, H1, H2, W0, W1, W2, rW, th, Qb, Qc, Qs;
+		double D0, D1, D2, H0, H1, H2, W0, W1, W2, rW, th, Qb, Qc, Qs;
 		double[] param = new double[4];
 		String sel;
 		ASHRAE_DB fitt = ASHRAE_DB.CUSTOM;
@@ -544,6 +603,24 @@ public class Fitting {
 						System.out.println(SD42.report(0));
 						break;
 					}
+					case SD5_1:
+						System.out.println("D_in: ");
+						D0 = Double.parseDouble(in.readLine());
+						System.out.println("D_b: ");
+						D1 = Double.parseDouble(in.readLine());
+						System.out.println("D_c: ");
+						D2 = Double.parseDouble(in.readLine());
+						System.out.println("Q_in: ");
+						Qc = Double.parseDouble(in.readLine());
+						System.out.println("Q_b: ");
+						Qb = Double.parseDouble(in.readLine());
+						param[0] = Qb / Qc;
+						param[1] = D1 * D1 / D0 / D0;
+						param[2] = D2 * D2 / D0 / D0;
+						Fitting SD51 = new Fitting(Fitting.ASHRAE_DB.SD5_1, param);
+						System.out.println(SD51.report(0));
+						System.out.println(SD51.report(1));
+						break;
 					case CR3_6:
 						System.out.print("W: ");
 						W0 = Double.parseDouble(in.readLine());
@@ -673,7 +750,19 @@ public class Fitting {
 						break;
 					}
 					case SR4_3:
-						break;
+						System.out.print("Din: ");
+						D1 = Double.parseDouble(in.readLine());
+						System.out.print("Wout: ");
+						W0 = Double.parseDouble(in.readLine());
+						System.out.print("Hout: ");
+						H0 = Double.parseDouble(in.readLine());
+						System.out.print("th: ");
+						th = Double.parseDouble(in.readLine());
+						param[0] = th;
+						param[1] = W0 * H0 / Math.PI / D1 / D1 * 4.;
+						Fitting SR43 = new Fitting(Fitting.ASHRAE_DB.SR4_3, param);
+						System.out.println(SR43.report(0));
+					    break;
 					case SR5_5:
 						System.out.print("Win: ");
 						W0 = Double.parseDouble(in.readLine());
