@@ -520,6 +520,7 @@ public class Fitting {
 	public static void main(String args[]) {
 		boolean exit = false;
 		boolean flag = false;
+		int i;
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		double D0, D1, D2, H0, H1, H2, W0, W1, W2, rW, th, Qb, Qc, Qs;
 		double[] param = new double[4];
@@ -528,9 +529,17 @@ public class Fitting {
 		try {
 			while(exit == false) {
 				while(flag == false) {
+					i = 0;
 					for(ASHRAE_DB val : ASHRAE_DB.values()) {
-						System.out.println(val.toString().replace('_', '-'));
+						if (i < 7){
+							i++;
+						} else{
+							i = 0;
+							System.out.println();
+						}
+						System.out.printf(val.toString().replace('_', '-') + '\t');
 					}
+					System.out.println();
 					System.out.print("Select an option:");
 					sel = in.readLine();
 					sel = sel.toUpperCase();
