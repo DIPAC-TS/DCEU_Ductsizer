@@ -14,6 +14,7 @@ public class Fitting {
 	public enum ASHRAE_DB{
 		CD3_1,
 		CD3_3,
+		ED4_1,
 		SD4_1,
 		SD4_2,
 		SD5_1,
@@ -61,6 +62,13 @@ public class Fitting {
 			a_ASHRAE = ASHRAE_DB.CD3_3;
 			a_nmparam = new String[1];
 			a_nmparam[0] = "D";
+			break;
+	    case ED4_1:
+		    a_type = Type.Transition;
+			a_ASHRAE = ASHRAE_DB.ED4_1;
+			a_nmparam = new String[2];
+			a_nmparam[0] = "th";
+			a_nmparam[1] = "A_0/A_1";
 			break;
 		case SD4_1:
 			a_type = Type.Transition;
@@ -225,7 +233,24 @@ public class Fitting {
 			double[] D1 = {75, 100, 125, 150, 180, 200, 230, 250};
 			double[] data1 = {0.18, 0.13, 0.1, 0.08, 0.07, 0.07, 0.07, 0.07};
 			a_loss[0] = DataTool.interpolate(D1, a_param[0], data1);
-			break;
+		    break;
+		case ED4_1:
+		    double[] thed41 = {0., 3., 5., 10., 15., 20., 30., 45., 60., 90., 120., 150., 180.};
+			double[] A0A1ed41 = {0.063, 0.10, 0.167, 0.25, 0.5, 1., 2., 4., 6., 10.};
+			double[][] dataed41 = {
+				    {0., 0.18, 0.18, 0.20, 0.29, 0.38, 0.60, 0.84, 0.88, 0.88, 0.88, 0.88, 0.88},
+					{0., 0.20, 0.18, 0.20, 0.27, 0.38, 0.59, 0.76, 0.80, 0.83, 0.84, 0.83, 0.83},
+				    {0., 0.18, 0.17, 0.18, 0.25, 0.33, 0.48, 0.66, 0.77, 0.74, 0.73, 0.73, 0.72},
+					{0., 0.20, 0.17, 0.16, 0.21, 0.30, 0.46, 0.61, 0.68, 0.64, 0.63, 0.62, 0.62},
+					{0., 0.15, 0.13, 0.11, 0.13, 0.19, 0.32, 0.33, 0.33, 0.32, 0.31, 0.30, 0.30},
+					{0., 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00},
+					{0., 0.30, 0.26, 0.21, 0.19, 0.19, 0.19, 0.23, 0.27, 0.51, 0.73, 0.90, 0.95},
+					{0., 1.60, 1.14, 0.75, 0.70, 0.70, 0.70, 0.90, 1.09, 2.78, 4.29, 5.63, 6.53},
+					{0., 3.89, 3.02, 1.73, 1.58, 1.58, 1.58, 2.12, 2.66, 6.62, 10.01, 13.03, 15.12},
+			        {0., 11.8, 9.30, 5.30, 5.00, 5.00, 5.00, 6.45, 7.90, 19.0, 28.5, 36.7, 42.7}
+			};
+			a_loss[0] = DataTool.interpolate2D(thed41, a_param[0], A0A1ed41, a_param[1], dataed41);
+		    break;
 		case SD4_1:
 			double[] A0A1a = {0.1, 0.167, 0.25, 0.39, 0.5, 0.64, 1., 2., 4., 6, 10., 16.};
 			double[] th5 = {0, 3, 5, 10, 15, 20, 30, 45, 60, 90, 120, 150, 180};
@@ -582,6 +607,19 @@ public class Fitting {
 						param[2] = rW;
 						Fitting CR31 = new Fitting(Fitting.ASHRAE_DB.CR3_1, param);
 						System.out.println(CR31.report(0));
+						break;
+					}
+					case ED4_1:{
+						System.out.println("Din: ");
+						D0 = Double.parseDouble(in.readLine());
+						System.out.println("Dout: ");
+						D1 = Double.parseDouble(in.readLine());
+						System.out.println("th: ");
+						th = Double.parseDouble(in.readLine());
+						param[0] = th;
+						param[1] = D0 * D0 / D1 / D1;
+						Fitting ED41 = new Fitting(Fitting.ASHRAE_DB.ED4_1, param);
+						System.out.println(ED41.report(0));
 						break;
 					}
 					case SD4_1:{
