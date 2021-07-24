@@ -1,0 +1,10 @@
+{
+  "name": "ASHRAE CR3-9",
+  "type": "Elbow",
+  "system": "Other",
+  "description": "Mitered, 90 Degree, Single-Thickness Vanes (40 mm Vane Spacing)",
+  "rel_k": null,
+  "data_k": [
+    0.11
+  ]
+}

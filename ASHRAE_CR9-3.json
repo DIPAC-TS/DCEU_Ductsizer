@@ -1,0 +1,10 @@
+{
+  "name": "ASHRAE CR9-3",
+  "type": "Damper",
+  "system": "Other",
+  "description": "Parallel and Opposed 3V Blades, Open",
+  "rel_k": null,
+  "data_k": [
+    0.37
+  ]
+}

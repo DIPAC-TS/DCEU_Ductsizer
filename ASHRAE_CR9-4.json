@@ -1,0 +1,10 @@
+{
+  "name": "ASHRAE CR9-4",
+  "type": "Damper",
+  "system": "Other",
+  "description": "Parallel and Opposed Airfoil Blades, Open",
+  "rel_k": null,
+  "data_k": [
+    0.18
+  ]
+}

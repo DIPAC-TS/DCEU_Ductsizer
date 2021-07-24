@@ -485,7 +485,7 @@ public class Duct {
 				System.out.print("Type '0' to change type: ");
 				stype = (Integer.parseInt(in.readLine()) == 0) ? 0: stype;
 			} catch (IOException ex) {
-				exit = true;
+					exit = true;
 				stype = 0;
 			} catch (NumberFormatException ex) {
 				//No action required
