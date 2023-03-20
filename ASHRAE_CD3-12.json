@@ -1,0 +1,19 @@
+{
+  "name": "ASHRAE CD3-12",
+  "type": "Elbow",
+  "system": "Other",
+  "description": "3 Gore, 90 Degree, r/D = 0.75 to 2.0",
+  "rel_xo": "D_i",
+  "x_o": [
+    0.75,
+    1.0,
+    1.5,
+    2.0
+  ],
+  "data_o": [
+    0.54,
+    0.42,
+    0.34,
+    0.33
+  ]
+}

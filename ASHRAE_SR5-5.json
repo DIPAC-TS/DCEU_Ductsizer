@@ -1,9 +1,9 @@
 {
   "name": "ASHRAE SR5-5",
   "type": "Tee",
-  "system": "Suppy",
-  "description": "Type A_o + A_1 > A_i , A_o = A_i , Diverging",
-  "rel_xo": "Q_o/Q_i",
+  "system": "Supply",
+  "description": "Tee of the Type As + Ab > Ac, As = Ac, Diverging",
+  "rel_xo": "Q_i/Q_o",
   "x_o": [
     0.1,
     0.2,
@@ -13,9 +13,9 @@
     0.6,
     0.7,
     0.8,
-    1.0
+    0.9
   ],
-  "rel_x1": "Q_1/Q_i",
+  "rel_x1": "Q_1/Q_o",
   "x_1": [
     0.1,
     0.2,
@@ -25,19 +25,7 @@
     0.6,
     0.7,
     0.8,
-    0.9
-  ],
-  "rel_y1": "A_1/A_i",
-  "y_1": [
-    0.1,
-    0.2,
-    0.3,
-    0.4,
-    0.5,
-    0.6,
-    0.7,
-    0.8,
-    0.9
+    1.0
   ],
   "data_o": [
     32.4,

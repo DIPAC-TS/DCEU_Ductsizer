@@ -1,0 +1,25 @@
+{
+  "name": "ASHRAE CD3-7",
+  "type": "Elbow",
+  "system": "Other",
+  "description": "Pleated, 45 Degree, r/D = 1.5",
+  "rel_xo": "D_i",
+  "x_o": [
+    100,
+    150,
+    200,
+    250,
+    300,
+    350,
+    400
+  ],
+  "data_o": [
+    0.34,
+    0.26,
+    0.21,
+    0.17,
+    0.16,
+    0.15,
+    0.15
+  ]
+}

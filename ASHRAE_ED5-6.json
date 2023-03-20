@@ -1,0 +1,31 @@
+{
+  "name": "ASHRAE ED5-6",
+  "type": "Capped Wye",
+  "system": "Exhaust",
+  "description": "Branch with 45 Degree Elbow, Branch 90 Degrees to Main, Converging, r/D = 1.5",
+  "rel_xo": "D_i",
+  "x_o": [
+    0.1,
+    0.2,
+    0.3,
+    0.4,
+    0.5,
+    0.6,
+    0.7,
+    0.8,
+    0.9,
+    1.0
+  ],
+  "data_o": [
+    1.02,
+    0.97,
+    0.93,
+    0.88,
+    0.84,
+    0.79,
+    0.75,
+    0.7,
+    0.66,
+    0.61
+  ]
+}
