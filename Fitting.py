@@ -16,7 +16,7 @@ class Fitting(object):
             return name in cls.__members__
             
     def __init__(self, schema:dict):
-        if (not self.__validate(schema)):
+        if (not self.validate(schema)):
             raise Exception("The data in the schema is not compatible, check the size of elements")
         self.set_name(schema["name"])
         self.fittype = schema["type"]
@@ -376,16 +376,16 @@ class Fitting(object):
     
     @staticmethod
     def __is_compatible(x, y, z, matrix):
-        if len(z) == 1.0:
-            if len(y) == 1.0:
+        if len(z) == 1:
+            if len(y) == 1:
                  return len(matrix) == len(x)
             else:
                  return len(matrix[0]) == len(x) and len(matrix) == len(y)
         else:
-            return len(matrix[0][0] == len(x) and len(matrix[0]) == len(y) and len(matrix) == len(z))
+            return (len(matrix[0][0]) == len(x) and len(matrix[0]) == len(y) and len(matrix) == len(z))
     
-    @staticmethod
-    def __validate(schema:dict):
+    @classmethod
+    def validate(cls, schema:dict):
         """Validates if the given schema is compatible with the Fitting class
         
         Parameters:
@@ -397,23 +397,26 @@ class Fitting(object):
         True if schema is compatible, else False
         """
         try:
-            if ("k" in schema.keys()):
+            if "k" in schema:
                 if (len(schema["k"]) != len(schema["data_k"])):
                     return False
             for j in ["o", "1", "2"]:
-                if (("z_" + j) in schema.keys()):
-                    if (not self.__is_compatible(schema["x_" + j],
+                if (("z_" + j) in schema):
+                    if (not cls.__is_compatible(schema["x_" + j],
                       schema["y_" + j], schema["z_" + j], schema["data_" + j])):
                         return False
-                    elif ("y_" + j) in schema.keys():
-                        if (not self.__is_compatible(schema["x_" + j],
-                          schema["y_" + j], [1.0], schema["data_" + j])):
-                            return False
-                        elif (not self.__is_compatible(schema["x_" + j],
-                          [1.0], [1.0], schema["data_" + j])):
-                            return False
+                elif ("y_" + j) in schema:
+                    if (not cls.__is_compatible(schema["x_" + j],
+                      schema["y_" + j], [1.0], schema["data_" + j])):
+                        return False
+                elif ("x_" + j) in schema:
+                    if (not cls.__is_compatible(schema["x_" + j],
+                      [1.0], [1.0], schema["data_" + j])):
+                        return False
             return True
-        except:
+        except Exception as e:
+            print("Error in schema validation")
+            print(e)
             return False
     
     @staticmethod

@@ -1,7 +1,7 @@
 {
   "name": "ASHRAE SR4-3",
   "type": "Transition",
-  "system": "Suppy",
+  "system": "Supply",
   "description": "Round to Rectangular, Supply Air Systems",
   "rel_xo": "th",
   "x_o": [
@@ -20,7 +20,7 @@
     180.0
   ],
   "rel_yo": "A_0/A_i",
-  "y_0": [
+  "y_o": [
     0.1,
     0.167,
     0.25,
